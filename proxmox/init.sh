@@ -1,27 +1,51 @@
 #!/bin/bash
+set -e
 
-set -e  # Exit immediately if a command exits with a non-zero status
-
-# Ensure HOMELAB_INIT is set and is a valid URL
-if [[ -z "$HOMELAB_INIT" ]]; then
-  echo "Error: HOMELAB_INIT variable is not set. Please set it to a valid URL."
-  exit 1
+if [[ -z "$GITHUB_USERNAME" ]]; then
+    read -p "GitHub username: " GITHUB_USERNAME
 fi
 
-# Extract the base URL from HOMELAB_INIT
-BASE_URL=$(dirname "$HOMELAB_INIT")
+if [[ -z "$PROXMOX_TERRAFORM_USER" ]]; then
+    PROXMOX_TERRAFORM_USER="terraform-prov@pve"
+fi
+echo "PROXMOX_TERRAFORM_USER: $PROXMOX_TERRAFORM_USER"
 
-# Define full URLs for the scripts
+# Note that Proxmox requires first character to be a letter.
+if [[ -z "$PROXMOX_TERRAFORM_PASSWORD" ]]; then
+    PROXMOX_TERRAFORM_PASSWORD="a-$(openssl rand -hex 8)"
+    echo "Generated PROXMOX_TERRAFORM_PASSWORD: $PROXMOX_TERRAFORM_PASSWORD"
+fi
+
+# Note that Proxmox requires first character to be a letter.
+if [[ -z "$PROXMOX_TERRAFORM_TOKEN" ]]; then
+    PROXMOX_TERRAFORM_TOKEN="a-$(openssl rand -hex 8)"
+    echo "Generated PROXMOX_TERRAFORM_TOKEN: $PROXMOX_TERRAFORM_TOKEN"
+fi
+
+if [[ -z "$SSH_PUBLIC_KEY" ]]; then
+    read -p "SSH public key: " SSH_PUBLIC_KEY
+fi
+
+export PROXMOX_TERRAFORM_USER PROXMOX_TERRAFORM_PASSWORD PROXMOX_TERRAFORM_TOKEN
+
+echo "$SSH_PUBLIC_KEY" >> ~/.ssh/authorized_keys
+echo "SSH public key added"
+
+cat <<'EOF'
+
+IMPORTANT: Make sure the same SSH public key exists at ~/.ssh/proxmox_ssh.pub on your local machine for Terraform access.
+
+EOF
+
+BASE_URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/homelab/refs/heads/main/proxmox"
 TERRAFORM_SCRIPT_URL="$BASE_URL/terraform.sh"
 TWEAKS_SCRIPT_URL="$BASE_URL/tweaks.sh"
 
-# Execute tweaks.sh
-echo "Executing tweaks.sh from $TWEAKS_SCRIPT_URL..."
+echo "Executing tweaks.sh..."
 curl -fsSL "$TWEAKS_SCRIPT_URL" | bash
 
-# Execute terraform.sh
-echo "Executing terraform.sh from $TERRAFORM_SCRIPT_URL..."
+echo "Executing terraform.sh..."
 curl -fsSL "$TERRAFORM_SCRIPT_URL" | bash
 
-echo "Proxmox initialization completed successfully."
+echo "Proxmox initialization completed."
 
