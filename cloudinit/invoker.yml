@@ -1,0 +1,115 @@
+#cloud-config
+
+# This is my main cloud-init config that I use for almost all my VMs.
+
+# Hostname and timezone
+hostname: Invoker
+timezone: Europe/Prague
+
+# SSH hardening
+ssh_pwauth: false
+disable_root: true
+
+# User configuration
+users:
+  - name: EMP
+    groups: [sudo, adm, docker, video, input, plugdev, netdev] # Add user to necessary groups
+    shell: /usr/bin/zsh # Set ZSH as default shell
+    lock_passwd: false # Allow password authentication initially
+    plain_text_passwd: asd # Default password, change on first login
+    # ssh_authorized_keys: YOUR_SSH_PUBLIC_KEY_HERE # Will be set by Terraform? TODO.
+
+# Package installation
+packages:
+  - qemu-guest-agent
+  - git
+  - neovim
+  - zsh
+  - python3
+  - python3-pip
+  - pipx
+  - curl
+  - wget
+  - htop
+  - build-essential
+
+# Write ZSH configuration (write as root; chown later)
+write_files:
+  - path: /home/EMP/.zshrc
+    permissions: '0644'
+    content: |
+      # Load secrets
+      # ssh user@1.1.1.1 'cat >> ~/.env' < os.env
+      if [ -f ~/.env ]; then
+        set -a
+        source ~/.env
+        set +a
+      fi
+
+      # Start tmux if connected via SSH and not already inside tmux
+      if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ]; then
+        tmux attach || tmux new
+      fi
+
+      # History settings
+      HISTFILE=~/.zsh_history
+      HISTSIZE=1000
+      SAVEHIST=10000
+      setopt APPEND_HISTORY
+
+      # Enable VIM mode
+      bindkey -v
+
+      # Unbind CTRL+L (later will be used for sgpt completion)
+      bindkey -r '^L'
+
+      # Fix not working backspace in VIM insert mode
+      bindkey -M viins '^?' backward-delete-char
+      bindkey -M viins '^H' backward-delete-char
+
+      # Keep default CTRL+R working
+      bindkey -M vicmd '^R' history-incremental-search-backward
+      bindkey -M viins '^R' history-incremental-search-backward
+
+      # Add Python packages to PATH
+      export PATH="$HOME/.local/bin:$PATH"
+
+      # Custom prompt
+      PROMPT='🌕 '
+
+      # Enable completions
+      autoload -Uz compinit
+      compinit
+
+  # CTRL+C to copy and CTRL+V to paste in terminal and nvim.
+  - path: /home/EMP/.config/nvim/init.vim
+    permissions: '0644'
+    content: |
+      vnoremap <C-c> "+y
+      nnoremap <C-v> "+p
+      inoremap <C-v> <C-r>+
+
+  - path: /home/EMP/.config/tmux/tmux.conf
+    permissions: '0644'
+    content: |
+      # Hide bar
+      set -g status off
+
+      # Prefix + i launch popup window with sgpt
+      bind i display-popup -E -d "#{pane_current_path}" "zsh -c 'source ~/.zshrc && sgpt --repl temp'"
+
+      # VIM like pane navigation
+      bind h select-pane -L
+      bind j select-pane -D
+      bind k select-pane -U
+      bind l select-pane -R
+
+# Run commands after initial setup
+runcmd:
+  - chown -R EMP:EMP /home/EMP
+  - wget -O /tmp/1password-cli.deb https://downloads.1password.com/linux/debian/amd64/stable/1password-cli-amd64-latest.deb
+  - apt-get install -y /tmp/1password-cli.deb
+  - su - EMP -c 'pipx install shell-gpt'
+  - timeout 3 systemctl enable --now qemu-guest-agent
+
+final_message: "Cloud-init setup is complete."
