@@ -18,7 +18,7 @@
 - Prebuilt VM setup for max perfomance (q35, VirtIO SCSI, io_uring, etc.)
 - QEMU guest agent enabled to report VM status to Proxmox/Terraform
 - Custom cloud-init config upload via snippets
-- SSH key injection from local `~/.ssh/proxmox_ssh.pub`
+- SSH keys imported automatically from GitHub
 - **Anything you might need is easy to add**
 ### Pre-configure VM/LXC with cloud-init:
 - User creation with sudo, docker, video groups
@@ -37,8 +37,7 @@ curl -O "https://raw.githubusercontent.com/ther1d/homelab/main/proxmox/init.sh" 
 ```
 
 You'll be prompted for (if not set via environment variables):
-- `GITHUB_USERNAME`
-- `SSH_PUBLIC_KEY`
+- `GITHUB_USERNAME` - used to fetch your SSH keys from GitHub
 
 Auto-generated/defaulted if not provided:
 - `PROXMOX_TERRAFORM_USER` - defaults to `terraform-prov@pve`
@@ -55,7 +54,7 @@ export PROXMOX_VE_API_TOKEN='terraform-prov@pve!terraform-token=<secret>'
 export PROXMOX_VE_INSECURE=true
 ```
 
-Ensure SSH key exists at `~/.ssh/proxmox_ssh.pub`, then:
+Then run:
 
 ```bash
 cd terraform

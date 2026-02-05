@@ -23,14 +23,6 @@ provider "proxmox" {
   }
 }
 
-# Important make sure to setup SSH public key.
-# TODO: check if this works.
-variable "ssh_public_key" {
-  description = "SSH public key for VM access"
-  type        = string
-  default     = file("~/.ssh/proxmox_ssh.pub")  # Reads from your key file
-}
-
 # Optional VM name variable.
 variable "vm_name" {
   description = "Name of the VM"
@@ -118,12 +110,6 @@ resource "proxmox_virtual_environment_vm" "proxmox_vm" {
     datastore_id      = "local-lvm"
     interface         = "scsi1"
     user_data_file_id = proxmox_virtual_environment_file.cloud_init.id
-    
-    # TODO: Need to check if this overwrites coud-init YML values.
-    user_account {
-      username = "EMP"
-      keys     = [var.ssh_public_key]
-    }
     
     ip_config {
       ipv4 {

@@ -16,8 +16,11 @@ users:
     groups: [sudo, adm, docker, video, input, plugdev, netdev] # Add user to necessary groups
     shell: /usr/bin/zsh # Set ZSH as default shell
     lock_passwd: false # Allow password authentication initially
-    plain_text_passwd: asd # Default password, change on first login
-    # ssh_authorized_keys: YOUR_SSH_PUBLIC_KEY_HERE # Will be set by Terraform? TODO.
+    plain_text_passwd: asd
+    ssh_import_id:
+      - gh:ther1d # Replace with your GitHub username
+      # This should call https://github.com/<user>.keys
+      # TODO: Maybe run GitHub action and auto replace it on forks?
 
 # Package installation
 packages:

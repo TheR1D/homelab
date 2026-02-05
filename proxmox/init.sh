@@ -22,20 +22,10 @@ if [[ -z "$PROXMOX_TERRAFORM_TOKEN" ]]; then
     echo "Generated PROXMOX_TERRAFORM_TOKEN: $PROXMOX_TERRAFORM_TOKEN"
 fi
 
-if [[ -z "$SSH_PUBLIC_KEY" ]]; then
-    read -p "SSH public key: " SSH_PUBLIC_KEY
-fi
-
 export PROXMOX_TERRAFORM_USER PROXMOX_TERRAFORM_PASSWORD PROXMOX_TERRAFORM_TOKEN
 
-echo "$SSH_PUBLIC_KEY" >> ~/.ssh/authorized_keys
-echo "SSH public key added"
-
-cat <<'EOF'
-
-IMPORTANT: Make sure the same SSH public key exists at ~/.ssh/proxmox_ssh.pub on your local machine for Terraform access.
-
-EOF
+curl -fsSL "https://github.com/$GITHUB_USERNAME.keys" >> ~/.ssh/authorized_keys
+echo "SSH public key added from GitHub"
 
 BASE_URL="https://raw.githubusercontent.com/$GITHUB_USERNAME/homelab/refs/heads/main/proxmox"
 TERRAFORM_SCRIPT_URL="$BASE_URL/terraform.sh"
@@ -48,4 +38,3 @@ echo "Executing terraform.sh..."
 curl -fsSL "$TERRAFORM_SCRIPT_URL" | bash
 
 echo "Proxmox initialization completed."
-
