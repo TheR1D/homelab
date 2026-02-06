@@ -52,14 +52,15 @@ wget -P /var/lib/vz/template/iso/ https://cloud-images.ubuntu.com/noble/current/
 
 PROXMOX_IP=$(hostname -I | awk '{print $1}')
 
-cat <<EOF
-
-Terraform bpg/proxmox Provider Configuration
-Copy and paste these commands on your local machine:
+TERRAFORM_CREDENTIALS="$(cat <<EOF
+Terraform bpg/proxmox Provider Configuration:
 export PROXMOX_VE_ENDPOINT='https://${PROXMOX_IP}:8006/'
 export PROXMOX_VE_API_TOKEN='${PROXMOX_TERRAFORM_USER}!${PROXMOX_TERRAFORM_TOKEN}=${TOKEN_SECRET}'
 export PROXMOX_VE_INSECURE=true
-
-Ubuntu 24.04 LTS Live Server:
-wget -P /var/lib/vz/template/iso/ https://releases.ubuntu.com/24.04/ubuntu-24.04.3-live-server-amd64.iso
 EOF
+)"
+
+echo "$TERRAFORM_CREDENTIALS"
+
+# Set Proxmox node description
+pvesh set "/nodes/$(hostname)/config" --description "$TERRAFORM_CREDENTIALS"

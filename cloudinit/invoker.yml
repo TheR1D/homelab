@@ -12,13 +12,15 @@ disable_root: true
 
 # User configuration
 users:
-  - name: EMP
+  - name: ther1d
     groups: [sudo, adm, docker, video, input, plugdev, netdev] # Add user to necessary groups
     shell: /usr/bin/zsh # Set ZSH as default shell
     lock_passwd: false # Allow password authentication initially
     plain_text_passwd: asd
-    ssh_import_id:
-      - gh:ther1d # Replace with your GitHub username
+    # For some reason this fails to set SSH key, most likely network is not up yet at that point.
+    # We will set is using runcmd.
+    # ssh_import_id:
+      # - gh:ther1d # Replace with your GitHub username
       # This should call https://github.com/<user>.keys
       # TODO: Maybe run GitHub action and auto replace it on forks?
 
@@ -38,7 +40,7 @@ packages:
 
 # Write ZSH configuration (write as root; chown later)
 write_files:
-  - path: /home/EMP/.zshrc
+  - path: /home/ther1d/.zshrc
     permissions: '0644'
     content: |
       # Load secrets
@@ -85,14 +87,14 @@ write_files:
       compinit
 
   # CTRL+C to copy and CTRL+V to paste in terminal and nvim.
-  - path: /home/EMP/.config/nvim/init.vim
+  - path: /home/ther1d/.config/nvim/init.vim
     permissions: '0644'
     content: |
       vnoremap <C-c> "+y
       nnoremap <C-v> "+p
       inoremap <C-v> <C-r>+
 
-  - path: /home/EMP/.config/tmux/tmux.conf
+  - path: /home/ther1d/.config/tmux/tmux.conf
     permissions: '0644'
     content: |
       # Hide bar
@@ -109,10 +111,12 @@ write_files:
 
 # Run commands after initial setup
 runcmd:
-  - chown -R EMP:EMP /home/EMP
+  - chown -R ther1d:ther1d /home/ther1d
   - wget -O /tmp/1password-cli.deb https://downloads.1password.com/linux/debian/amd64/stable/1password-cli-amd64-latest.deb
   - apt-get install -y /tmp/1password-cli.deb
-  - su - EMP -c 'pipx install shell-gpt'
+  - su - ther1d -c 'pipx install shell-gpt'
   - timeout 3 systemctl enable --now qemu-guest-agent
+  # Set public SSH key gh:username should be replaced.
+  - sudo -Hu ther1d ssh-import-id gh:ther1d
 
 final_message: "Cloud-init setup is complete."
