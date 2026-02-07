@@ -41,31 +41,11 @@ packages:
 
 # Write ZSH configuration (write as root; chown later)
 write_files:
-  - path: /etc/ssh/sshd_config.d/accept_env.conf
-    permissions: '0644'
-    content: |
-      AcceptEnv OP_SERVICE_ACCOUNT_TOKEN
-
   - path: /home/ther1d/.zshrc
     permissions: '0644'
     content: |
-      # Check if OP_SERVICE_ACCOUNT_TOKEN is set and ~/.env does not exist
-      # Can be triggered by running: 
-      # OP_SERVICE_ACCOUNT_TOKEN="$(op read 'op://...')" ssh -o SendEnv=OP_SERVICE_ACCOUNT_TOKEN user@host
-      if [ "$OP_SERVICE_ACCOUNT_TOKEN" ] && [ ! -f ~/.env ]; then
-        # Run in subshell to avoid poluting user environment with
-        (
-          set -e          # Fail if any command fails
-          set -o pipefail # Fail if any command in pipeline fails
-          # Inject ENVs using template and passwords from op
-          op read 'op://Homelab/.env/notes' | op inject > ~/.env
-          # Expected note:
-          # VARIABLE_NAME=op://Vault/Item/Field
-          # ANOTHER_VARIABLE_NAME=op://Homelab/API Key/password
-        )
-      fi
-
       # Load secrets
+      # ssh user@1.1.1.1 'cat >> ~/.env' < os.env
       if [ -f ~/.env ]; then
         set -a
         source ~/.env
@@ -131,8 +111,6 @@ write_files:
 # Run commands after initial setup
 runcmd:
   - chown -R ther1d:ther1d /home/ther1d
-  - wget -O /tmp/1password-cli.deb https://downloads.1password.com/linux/debian/amd64/stable/1password-cli-amd64-latest.deb
-  - apt-get install -y /tmp/1password-cli.deb
   - su - ther1d -c 'pipx install shell-gpt'
   - timeout 3 systemctl enable --now qemu-guest-agent
   # Set public SSH key gh:username should be replaced.
