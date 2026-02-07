@@ -13,3 +13,8 @@ pvesm add dir storage \
   --path /mnt/storage \
   --content images,backup \
   --nodes proxmox
+
+# ...
+pvscan
+vgscan
+vgchange -ay
