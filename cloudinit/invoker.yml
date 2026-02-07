@@ -1,6 +1,7 @@
 #cloud-config
 
 # This is my main cloud-init config that I use for almost all my VMs.
+# The config expects Debian/Ubuntu cloud images.
 
 # Hostname and timezone
 hostname: Invoker
@@ -40,20 +41,35 @@ packages:
 
 # Write ZSH configuration (write as root; chown later)
 write_files:
+  - path: /etc/ssh/sshd_config.d/accept_env.conf
+    permissions: '0644'
+    content: |
+      AcceptEnv OP_SERVICE_ACCOUNT_TOKEN
+
   - path: /home/ther1d/.zshrc
     permissions: '0644'
     content: |
+      # Check if OP_SERVICE_ACCOUNT_TOKEN is set and ~/.env does not exist
+      # Can be triggered by running: 
+      # OP_SERVICE_ACCOUNT_TOKEN="$(op read 'op://...')" ssh -o SendEnv=OP_SERVICE_ACCOUNT_TOKEN user@host
+      if [ "$OP_SERVICE_ACCOUNT_TOKEN" ] && [ ! -f ~/.env ]; then
+        # Run in subshell to avoid poluting user environment with
+        (
+          set -e          # Fail if any command fails
+          set -o pipefail # Fail if any command in pipeline fails
+          # Inject ENVs using template and passwords from op
+          op read 'op://Homelab/.env/notes' | op inject > ~/.env
+          # Expected note:
+          # VARIABLE_NAME=op://Vault/Item/Field
+          # ANOTHER_VARIABLE_NAME=op://Homelab/API Key/password
+        )
+      fi
+
       # Load secrets
-      # ssh user@1.1.1.1 'cat >> ~/.env' < os.env
       if [ -f ~/.env ]; then
         set -a
         source ~/.env
         set +a
-      fi
-
-      # Start tmux if connected via SSH and not already inside tmux
-      if [ -n "$SSH_CONNECTION" ] && [ -z "$TMUX" ]; then
-        tmux attach || tmux new
       fi
 
       # History settings
@@ -76,6 +92,9 @@ write_files:
       bindkey -M vicmd '^R' history-incremental-search-backward
       bindkey -M viins '^R' history-incremental-search-backward
 
+      # CTRL+T to attach or create tmux session
+      bindkey -s '^T' 'tmux attach || tmux new\n'
+
       # Add Python packages to PATH
       export PATH="$HOME/.local/bin:$PATH"
 
@@ -86,7 +105,7 @@ write_files:
       autoload -Uz compinit
       compinit
 
-  # CTRL+C to copy and CTRL+V to paste in terminal and nvim.
+  # CTRL+C to copy and CTRL+V to paste in nvim.
   - path: /home/ther1d/.config/nvim/init.vim
     permissions: '0644'
     content: |
