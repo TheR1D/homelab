@@ -1,11 +1,11 @@
 ## template: jinja
 #cloud-config
 
-# TODO: Maybe run GitHub action and auto replace it on forks?
-{% set username = 'ther1d' %} # Replace with your GitHub username
-
 # This is my main cloud-init config that I use for almost all my VMs.
 # The config expects Debian/Ubuntu cloud images.
+
+# TODO: Maybe run GitHub action and auto replace it on forks?
+{% set username = 'ther1d' %} # Replace with your GitHub username
 
 # Hostname and timezone
 hostname: Invoker
