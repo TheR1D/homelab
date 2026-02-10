@@ -1,0 +1,53 @@
+## template: jinja
+#cloud-config
+
+merge_how:
+ - name: list
+   settings: [append]
+ - name: dict
+   settings: [no_replace, recurse_list]
+
+packages:
+  - samba
+
+write_files:
+  - path: /etc/samba/smb.conf
+    permissions: "0644"
+    content: |
+      [global]
+        workgroup = WORKGROUP
+        security = user
+        map to guest = bad user
+        smb ports = 445
+        server min protocol = SMB2
+
+      [nas]
+        path = /srv/${nas_storage}
+        browseable = yes
+        read only = no
+        valid users = ${username}
+        create mask = 0660
+        directory mask = 0770
+
+  - path: /etc/fstab
+    append: true
+    content: |
+      # VirtIO-FS mount from Proxmox (Hardware -> Add -> VirtIO-FS, tag: nas)
+      ${nas_storage}  /srv/${nas_storage}  virtiofs  defaults,_netdev  0  0
+
+runcmd:
+  # Create mountpoint + mount
+  - mkdir -p /srv/${nas_storage}
+  - mount -a
+
+  # Ownership (adjust if you want different permissions)
+  - chown -R $${username}:$${username} /srv/${nas_storage}
+
+  - printf '%s\n%s\n' '${user_password}' '${user_password}' | smbpasswd -a -s ${username}
+
+  # Enable services
+  - systemctl enable smbd
+  - systemctl restart smbd
+
+  # Firewall: allow SMB from LAN
+  - ufw allow from 10.20.30.0/24 to any port 445 proto tcp

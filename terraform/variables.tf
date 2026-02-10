@@ -1,0 +1,21 @@
+# Terraform will ask for this value if not provided via -var or TF_VAR_
+variable "user_password" {
+  description = "Password for the VM/LXC user"
+  type        = string
+  sensitive   = true
+}
+
+variable "username" {
+  description = "Username for the VM/LXC user"
+  type        = string
+}
+
+variable "ssh_public_key" {
+  description = "SSH public key for the VM/LXC"
+  type        = string
+}
+
+variable "timezone" {
+  description = "Timezone for the VM/LXC"
+  type        = string
+}

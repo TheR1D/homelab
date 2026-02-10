@@ -34,6 +34,9 @@ pveum role add TerraformProv -privs \
     VM.PowerMgmt \
     VM.GuestAgent.Audit \
     VM.GuestAgent.Unrestricted \
+    Mapping.Modify \
+    Mapping.Use \
+    SDN.Audit \
     SDN.Use"
 
 echo "Creating Proxmox user '$PROXMOX_TERRAFORM_USER' and assigning 'TerraformProv' role"

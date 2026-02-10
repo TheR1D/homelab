@@ -42,19 +42,52 @@ variable "ram" {
 variable "disk" {
   description = "Disk configuration"
   type = object({
-    size    = number
-    file_id = string
-    backup  = bool
+    size        = number
+    file_id     = optional(string)
+    import_from = optional(string)
+    file_format = optional(string)
+    backup      = bool
   })
   default = {
-    size    = 20
-    file_id = "local:iso/noble-server-cloudimg-amd64.img"
-    backup  = false
+    size        = 20
+    file_format = "raw"
+    backup      = false
   }
 }
 
-variable "cloud_init" {
-  description = "Path to cloud-init configuration file (e.g., ../cloudinit/invoker.yml)"
-  type        = string
+variable "cloud_init_files" {
+  description = "List of cloud-init file paths to merge"
+  type        = list(string)
 }
 
+variable "cloudinit_vars" {
+  description = "Variables to pass to cloud-init templates"
+  type        = map(any)
+  default     = {}
+}
+
+variable "os_image" {
+  description = "OS image configuration for the VM"
+  type = object({
+    url                = string
+    checksum           = optional(string)
+    checksum_algorithm = optional(string)
+    file_name          = optional(string)
+  })
+}
+
+variable "serial_device" {
+  description = "Enable serial device (socket). Useful for kernel panic fix on Debian cloud images."
+  type        = bool
+  default     = false
+}
+
+variable "virtiofs" {
+  description = "VirtIO-FS share configurations"
+  type = list(object({
+    mapping   = string
+    cache     = optional(string)
+    direct_io = optional(bool)
+  }))
+  default = []
+}

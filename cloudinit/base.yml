@@ -1,15 +1,17 @@
-## template: jinja
 #cloud-config
 
-# This is my main cloud-init config that I use for almost all my VMs.
-# The config expects Debian/Ubuntu cloud images.
+merge_how:
+ - name: list
+   settings: [append]
+ - name: dict
+   settings: [no_replace, recurse_list]
 
-# TODO: Maybe run GitHub action and auto replace it on forks?
-{% set username = 'ther1d' %} # Replace with your GitHub username
+package_update: true
+package_upgrade: true
 
 # Hostname and timezone
-hostname: Invoker
-timezone: Europe/Prague
+hostname: ${hostname}
+timezone: ${timezone}
 
 # SSH hardening
 ssh_pwauth: false
@@ -17,33 +19,32 @@ disable_root: true
 
 # User configuration
 users:
-  - name: {{ username }}
-    groups: [sudo, adm, docker, video, input, plugdev, netdev] # Add user to necessary groups
-    shell: /usr/bin/zsh # Set ZSH as default shell
-    lock_passwd: false # Allow password authentication initially
-    plain_text_passwd: asd
-    # For some reason this fails to set SSH key, most likely network is not up yet at that point.
-    # We will set is using runcmd.
-    # ssh_import_id:
-      # - gh:{{ username }} # Replace with your GitHub username
+  - name: ${username}
+    groups: [sudo, input, plugdev, netdev] # Add user to necessary groups
+    shell: /usr/bin/zsh
+    lock_passwd: false
+    plain_text_passwd: ${user_password}
+    ssh_authorized_keys: ${ssh_public_key}
 
-# Package installation
+# Package installation, most of these are preinstalled on Ubuntu.
 packages:
   - qemu-guest-agent
+  - ufw
   - git
-  - neovim
   - zsh
+  - tmux
+  - htop
+  - curl
+  - wget
+  - neovim
   - python3
   - python3-pip
   - pipx
-  - curl
-  - wget
-  - htop
   - build-essential
 
 # Write ZSH configuration (write as root; chown later)
 write_files:
-  - path: /home/{{ username }}/.zshrc
+  - path: /home/${username}/.zshrc
     permissions: '0644'
     content: |
       # Load secrets
@@ -78,24 +79,24 @@ write_files:
       bindkey -s '^T' 'tmux attach || tmux new\n'
 
       # Add Python packages to PATH
-      export PATH="$HOME/.local/bin:$PATH"
+      export PATH="$${HOME}/.local/bin:$${PATH}"
 
       # Custom prompt
-      PROMPT='🌕 '
+      PROMPT="$(hostname): "
 
       # Enable completions
       autoload -Uz compinit
       compinit
 
   # CTRL+C to copy and CTRL+V to paste in nvim.
-  - path: /home/{{ username }}/.config/nvim/init.vim
+  - path: /home/${username}/.config/nvim/init.vim
     permissions: '0644'
     content: |
       vnoremap <C-c> "+y
       nnoremap <C-v> "+p
       inoremap <C-v> <C-r>+
 
-  - path: /home/{{ username }}/.config/tmux/tmux.conf
+  - path: /home/${username}/.config/tmux/tmux.conf
     permissions: '0644'
     content: |
       # Hide bar
@@ -112,10 +113,10 @@ write_files:
 
 # Run commands after initial setup
 runcmd:
-  - chown -R {{ username }}:{{ username }} /home/{{ username }}
-  - su - {{ username }} -c 'pipx install shell-gpt'
+  - chown -R ${username}:${username} /home/${username}
+  - su - ${username} -c 'pipx install shell-gpt'
   - timeout 3 systemctl enable --now qemu-guest-agent
-  # Set public SSH key gh:username should be replaced.
-  - sudo -Hu {{ username }} ssh-import-id gh:{{ username }}
+  - ufw allow from 10.20.30.0/24 to any port 22 proto tcp
+  - ufw --force enable
 
 final_message: "Cloud-init setup is complete."
