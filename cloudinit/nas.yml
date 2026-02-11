@@ -50,4 +50,4 @@ runcmd:
   - systemctl restart smbd
 
   # Firewall: allow SMB from LAN
-  - ufw allow from 10.20.30.0/24 to any port 445 proto tcp
+  - ufw allow from ${local_subnet} to any port 445 proto tcp

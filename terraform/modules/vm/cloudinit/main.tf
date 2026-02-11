@@ -1,9 +1,17 @@
 terraform {
   required_providers {
     proxmox = {
-      source = "bpg/proxmox"
+      source  = "bpg/proxmox"
+      version = "~> 0.95.0"
     }
   }
+}
+# Generate MAC address from VM name, useful for static DHCP leases.
+# Basically the idea is to generate deterministic MAC address from VM 
+# name so we can set static DHCP lease for it on DHCP server.
+# echo "02:$(echo -n 'kong' | md5sum | cut -c1-10 | sed 's/../&:/g' | sed 's/:$//')"
+locals {
+  mac_address = "02:${join(":", regex("(..)(..)(..)(..)(..).*", md5(var.vm_name)))}"
 }
 
 data "cloudinit_config" "config" {
@@ -45,6 +53,8 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
 resource "proxmox_virtual_environment_vm" "vm" {
   vm_id         = var.vm_id
   name          = var.vm_name
+  description   = "Managed by Terraform"
+  tags          = concat(["terraform"], var.tags)
   node_name     = var.node_name
   machine       = "q35"
   scsi_hardware = "virtio-scsi-single"
@@ -84,16 +94,21 @@ resource "proxmox_virtual_environment_vm" "vm" {
     interface         = "scsi1"
     user_data_file_id = proxmox_virtual_environment_file.cloud_init.id
 
+    dns {
+      servers = var.dns_servers
+    }
+
     ip_config {
       ipv4 {
-        # TODO: Move into cloud init.
-        address = "dhcp"
+        address = var.ip_config.address
+        gateway = var.ip_config.gateway
       }
     }
   }
 
   network_device {
-    bridge = "vmbr0"
+    bridge      = "vmbr0"
+    mac_address = local.mac_address
   }
 
   operating_system {

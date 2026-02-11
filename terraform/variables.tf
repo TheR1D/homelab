@@ -19,3 +19,24 @@ variable "timezone" {
   description = "Timezone for the VM/LXC"
   type        = string
 }
+
+variable "cf_api_token" {
+  description = "Cloudflare API token for DNS challenge (Zone:DNS:Edit permission)"
+  type        = string
+  sensitive   = true
+}
+
+variable "cert_domain" {
+  description = "Domain for SSL certificate (e.g., example.com)"
+  type        = string
+}
+
+variable "cert_email" {
+  description = "Email for Let's Encrypt registration"
+  type        = string
+}
+
+variable "local_subnet" {
+  description = "Local subnet CIDR for firewall rules (e.g., 192.168.0.0/24)"
+  type        = string
+}

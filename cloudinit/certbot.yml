@@ -1,0 +1,46 @@
+## template: jinja
+#cloud-config
+
+merge_how:
+ - name: list
+   settings: [append]
+ - name: dict
+   settings: [no_replace, recurse_list]
+
+packages:
+  - certbot
+  - python3-certbot-dns-cloudflare
+  - cron
+
+write_files:
+  - path: /etc/letsencrypt/cloudflare.ini
+    permissions: "0600"
+    content: |
+      dns_cloudflare_api_token = ${cf_api_token}
+
+  - path: /etc/cron.d/certbot-renew
+    permissions: "0644"
+    content: |
+      0 0,12 * * * root certbot renew --quiet
+
+runcmd:
+  # Obtain certificate using DNS challenge
+  - |
+    certbot certonly \
+      --dns-cloudflare \
+      --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
+      --email "${cert_email}" \
+      --agree-tos \
+      --no-eff-email \
+      -d "${cert_domain}" \
+      -d "*.${cert_domain}"
+
+  # Create symlinks for easy access
+  - mkdir -p /srv/certs
+  - ln -sf /etc/letsencrypt/live/${cert_domain}/fullchain.pem /srv/certs/fullchain.pem
+  - ln -sf /etc/letsencrypt/live/${cert_domain}/privkey.pem /srv/certs/privkey.pem
+  - ln -sf /etc/letsencrypt/live/${cert_domain}/chain.pem /srv/certs/chain.pem
+  - ln -sf /etc/letsencrypt/live/${cert_domain}/cert.pem /srv/certs/cert.pem
+
+final_message: "Certbot setup complete. Certificates are in /srv/certs/"
+

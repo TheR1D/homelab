@@ -9,6 +9,12 @@ merge_how:
 package_update: true
 package_upgrade: true
 
+# Swap configuration (2GB)
+swap:
+  filename: /swapfile
+  size: 2147483648
+  maxsize: 2147483648
+
 # Hostname and timezone
 hostname: ${hostname}
 timezone: ${timezone}
@@ -21,10 +27,11 @@ disable_root: true
 users:
   - name: ${username}
     groups: [sudo, input, plugdev, netdev] # Add user to necessary groups
-    shell: /usr/bin/zsh
+    # shell: /usr/bin/zsh
     lock_passwd: false
     plain_text_passwd: ${user_password}
     ssh_authorized_keys: ${ssh_public_key}
+    sudo: ALL=(ALL) NOPASSWD:ALL # TODO: remove this after alpha
 
 # Package installation, most of these are preinstalled on Ubuntu.
 packages:
@@ -116,7 +123,5 @@ runcmd:
   - chown -R ${username}:${username} /home/${username}
   - su - ${username} -c 'pipx install shell-gpt'
   - timeout 3 systemctl enable --now qemu-guest-agent
-  - ufw allow from 10.20.30.0/24 to any port 22 proto tcp
+  - ufw allow from ${local_subnet} to any port 22 proto tcp
   - ufw --force enable
-
-final_message: "Cloud-init setup is complete."

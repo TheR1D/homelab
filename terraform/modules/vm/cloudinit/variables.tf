@@ -91,3 +91,26 @@ variable "virtiofs" {
   }))
   default = []
 }
+
+variable "ip_config" {
+  description = "Use 'dhcp' for DHCP or CIDR notation for static (e.g., '192.168.0.10/24')"
+  type = object({
+    address = string
+    gateway = optional(string)
+  })
+  default = {
+    address = "dhcp"
+  }
+}
+
+variable "dns_servers" {
+  description = "List of DNS servers for the VM"
+  type        = list(string)
+  default     = ["1.1.1.1", "8.8.8.8"]
+}
+
+variable "tags" {
+  description = "Additional tags to apply to the VM"
+  type        = list(string)
+  default     = []
+}
