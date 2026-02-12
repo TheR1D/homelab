@@ -3,6 +3,7 @@ module "example_vm" {
   vm_name          = "example-vm"
   cloud_init_files = ["${path.module}/../cloudinit/base.yml"]
   tags             = ["kong"]
+  agent_timeout    = "2m"
   cloudinit_vars = {
     username       = var.username
     user_password  = var.user_password

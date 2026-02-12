@@ -2,6 +2,7 @@ module "nas_vm" {
   source        = "./modules/vm/cloudinit"
   vm_name       = "nas"
   serial_device = true
+  agent_timeout = "2m"
   cloud_init_files = [
     "${path.module}/../cloudinit/base.yml",
     "${path.module}/../cloudinit/nas.yml",

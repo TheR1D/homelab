@@ -94,8 +94,12 @@ resource "proxmox_virtual_environment_vm" "vm" {
     interface         = "scsi1"
     user_data_file_id = proxmox_virtual_environment_file.cloud_init.id
 
-    dns {
-      servers = var.dns_servers
+    dynamic "dns" {
+      for_each = var.dns != null ? [var.dns] : []
+      content {
+        domain  = dns.value.domain
+        servers = dns.value.servers
+      }
     }
 
     ip_config {

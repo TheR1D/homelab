@@ -103,10 +103,13 @@ variable "ip_config" {
   }
 }
 
-variable "dns_servers" {
-  description = "List of DNS servers for the VM"
-  type        = list(string)
-  default     = ["1.1.1.1", "8.8.8.8"]
+variable "dns" {
+  description = "DNS configuration (domain and servers)"
+  type = object({
+    domain  = optional(string)
+    servers = optional(list(string))
+  })
+  default = null
 }
 
 variable "tags" {

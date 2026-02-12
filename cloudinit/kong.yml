@@ -131,4 +131,3 @@ runcmd:
   # Status endpoint (health checks)
   - ufw allow from ${local_subnet} to any port 8100 proto tcp
   - ufw --force enable
-  - reboot

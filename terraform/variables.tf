@@ -40,3 +40,8 @@ variable "local_subnet" {
   description = "Local subnet CIDR for firewall rules (e.g., 192.168.0.0/24)"
   type        = string
 }
+
+variable "proxmox_ip" {
+  description = "Proxmox server IP address"
+  type        = string
+}

@@ -8,7 +8,7 @@ output "vm_name" {
   value       = proxmox_virtual_environment_vm.vm.name
 }
 
-# TODO: probably not gonna work.
+# This relies on quemu-guest-agent to be running inside VM
 output "vm_ip_address" {
   description = "VM IP address (first IPv4 from first network interface)"
   value       = try(proxmox_virtual_environment_vm.vm.ipv4_addresses[1][0], null)

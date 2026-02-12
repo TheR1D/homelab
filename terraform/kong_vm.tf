@@ -3,7 +3,7 @@ module "kong_vm" {
   vm_name       = "kong"
   serial_device = true
   cpu_cores     = 2
-  agent_timeout = "120s"
+  agent_timeout = "2m"
   ram = {
     dedicated = 4096
     floating  = 2048
