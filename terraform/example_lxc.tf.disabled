@@ -1,0 +1,27 @@
+module "example_lxc" {
+  source           = "./modules/lxc/cloudinit"
+  ct_name          = "example-lxc"
+  cloud_init_files = ["${path.module}/../cloudinit/base.yml"]
+  cloudinit_vars = {
+    username       = var.username
+    user_password  = var.user_password
+    ssh_public_key = var.ssh_public_key
+    local_subnet   = var.local_subnet
+    hostname       = "example-lxc"
+    timezone       = var.timezone
+  }
+  os_template = {
+    url       = "https://images.linuxcontainers.org/images/ubuntu/noble/amd64/cloud/20260212_07%3A42/rootfs.tar.xz"
+    file_name = "ubuntu-noble-cloud-rootfs.tar.xz"
+  }
+  cpu_cores = 2
+  memory = {
+    dedicated = 1024
+    swap      = 512
+  }
+  disk = {
+    datastore_id = "local-lvm"
+    size         = 8
+  }
+}
+

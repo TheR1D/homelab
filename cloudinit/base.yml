@@ -27,7 +27,7 @@ disable_root: true
 users:
   - name: ${username}
     groups: [sudo, input, plugdev, netdev] # Add user to necessary groups
-    # shell: /usr/bin/zsh
+    shell: /usr/bin/zsh
     lock_passwd: false
     plain_text_passwd: ${user_password}
     ssh_authorized_keys: ${ssh_public_key}
@@ -35,6 +35,7 @@ users:
 
 # Package installation, most of these are preinstalled on Ubuntu.
 packages:
+  - openssh-server # LXC containers don't have SSH server installed by default
   - qemu-guest-agent
   - ufw
   - git
@@ -122,6 +123,8 @@ write_files:
 runcmd:
   - chown -R ${username}:${username} /home/${username}
   - su - ${username} -c 'pipx install shell-gpt'
-  - timeout 3 systemctl enable --now qemu-guest-agent
+  - systemctl enable --now qemu-guest-agent
   - ufw allow from ${local_subnet} to any port 22 proto tcp
   - ufw --force enable
+  # After installation complete drop caches to free up memory
+  - sysctl -w vm.drop_caches=3

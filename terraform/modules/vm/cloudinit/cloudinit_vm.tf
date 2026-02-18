@@ -36,6 +36,7 @@ resource "proxmox_virtual_environment_download_file" "image" {
   checksum           = var.os_image.checksum
   checksum_algorithm = var.os_image.checksum_algorithm
   file_name          = var.os_image.file_name
+  overwrite          = false
 }
 
 # Upload merged cloud-init configuration
@@ -43,6 +44,7 @@ resource "proxmox_virtual_environment_file" "cloud_init" {
   content_type = "snippets"
   datastore_id = "local"
   node_name    = var.node_name
+  overwrite    = true
 
   source_raw {
     data      = data.cloudinit_config.config.rendered
