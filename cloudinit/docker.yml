@@ -19,18 +19,11 @@ write_files:
       # VirtIO-FS mount from Proxmox (mapping: ${virtiofs_folder})
       ${virtiofs_folder}  /srv/docker-data  virtiofs  defaults,_netdev  0  0
 
-  - path: /etc/docker/daemon.json
-    permissions: "0644"
-    content: |
-      {}
-
   # Passwordless sudo for docker commands
   - path: /etc/sudoers.d/docker
     permissions: "0440"
     content: |
       ${username} ALL=(ALL) NOPASSWD: /usr/bin/docker, /usr/bin/docker-compose
-
-
 
 runcmd:
   # Mount VirtIO-FS share

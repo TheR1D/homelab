@@ -46,12 +46,6 @@ variable "proxmox_ip" {
   type        = string
 }
 
-variable "kong_admin_url" {
-  description = "Kong Gateway Admin API URL"
-  type        = string
-  default     = null
-}
-
 variable "proxmox_node" {
   description = "Proxmox node name"
   type        = string

@@ -17,6 +17,7 @@ swap:
 
 # Hostname and timezone
 hostname: ${hostname}
+fqdn: ${hostname}
 timezone: ${timezone}
 
 # SSH hardening
