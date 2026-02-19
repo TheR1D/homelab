@@ -19,6 +19,13 @@ write_files:
       # VirtIO-FS mount from Proxmox (mapping: ${virtiofs_folder})
       ${virtiofs_folder}  /srv/docker-data  virtiofs  defaults,_netdev  0  0
 
+  - path: /etc/docker/daemon.json
+    permissions: "0644"
+    content: |
+      {
+        "metrics-addr": "0.0.0.0:9323"
+      }
+
   # Passwordless sudo for docker commands
   - path: /etc/sudoers.d/docker
     permissions: "0440"
@@ -47,3 +54,5 @@ runcmd:
   - systemctl enable docker
   # Add user to docker group
   - usermod -aG docker ${username}
+  # Allow Docker containers to access Docker metrics
+  - ufw allow from 172.16.0.0/12 to any port 9323 proto tcp

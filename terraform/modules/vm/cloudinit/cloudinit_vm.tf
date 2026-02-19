@@ -2,7 +2,7 @@ terraform {
   required_providers {
     proxmox = {
       source  = "bpg/proxmox"
-      version = "~> 0.95.0"
+      version = "~> 0.96.0"
     }
   }
 }
@@ -36,7 +36,7 @@ resource "proxmox_virtual_environment_download_file" "image" {
   checksum           = var.os_image.checksum
   checksum_algorithm = var.os_image.checksum_algorithm
   file_name          = var.os_image.file_name
-  overwrite          = false
+  overwrite          = true
 }
 
 # Upload merged cloud-init configuration
