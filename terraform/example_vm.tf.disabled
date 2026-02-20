@@ -8,6 +8,7 @@ module "example_vm" {
     user_password  = var.user_password
     ssh_public_key = var.ssh_public_key
     local_subnet   = var.local_subnet
+    vpn_subnet     = var.vpn_subnet
     hostname       = "example-vm"
     timezone       = var.timezone
   }

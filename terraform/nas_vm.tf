@@ -26,13 +26,14 @@ module "nas_vm" {
     "${path.module}/../cloudinit/nas.yml",
   ]
   cloudinit_vars = {
-    username       = "nasuser"
-    user_password  = var.user_password
+    username      = "nasuser"
+    user_password = var.user_password
     ssh_public_key = var.ssh_public_key
-    timezone       = var.timezone
-    local_subnet   = var.local_subnet
-    hostname       = "nas"
-    nas_storage    = "nas"
+    timezone      = var.timezone
+    local_subnet  = var.local_subnet
+    vpn_subnet    = var.vpn_subnet
+    hostname      = "nas"
+    nas_storage   = "nas"
   }
   os_image = {
     url                = "https://cloud-images.ubuntu.com/noble/current/noble-server-cloudimg-amd64.img"

@@ -126,6 +126,7 @@ runcmd:
   - su - ${username} -c 'pipx install shell-gpt'
   - systemctl enable --now qemu-guest-agent
   - ufw allow from ${local_subnet} to any port 22 proto tcp
+  - ufw allow from ${vpn_subnet} to any port 22 proto tcp
   - ufw --force enable
   # After installation complete drop caches to free up memory
   - sysctl -w vm.drop_caches=3

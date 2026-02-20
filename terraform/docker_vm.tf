@@ -23,13 +23,18 @@ module "docker_vm" {
     dedicated = 8192
     floating = 0
   }
+  disk = {
+    size   = 40
+    backup = false
+  }
   cloudinit_vars = {
-    username       = var.username
-    user_password  = var.user_password
-    ssh_public_key = var.ssh_public_key
-    local_subnet   = var.local_subnet
-    hostname       = "docker"
-    timezone       = var.timezone
+    username        = var.username
+    user_password   = var.user_password
+    ssh_public_key  = var.ssh_public_key
+    local_subnet    = var.local_subnet
+    vpn_subnet      = var.vpn_subnet
+    hostname        = "docker"
+    timezone        = var.timezone
     virtiofs_folder = proxmox_virtual_environment_hardware_mapping_dir.docker-data.name
   }
   os_image = {

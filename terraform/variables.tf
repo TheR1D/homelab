@@ -25,6 +25,11 @@ variable "local_subnet" {
   type        = string
 }
 
+variable "vpn_subnet" {
+  description = "VPN subnet CIDR for firewall rules (e.g., 10.255.255.0/24)"
+  type        = string
+}
+
 variable "proxmox_node" {
   description = "Proxmox node name"
   type        = string
