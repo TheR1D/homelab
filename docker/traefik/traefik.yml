@@ -29,6 +29,10 @@ certificatesResolvers:
           - "1.1.1.1:53"
           - "8.8.8.8:53"
 
+# Skip certificate verification for proxied services
+serversTransport:
+  insecureSkipVerify: true
+
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
